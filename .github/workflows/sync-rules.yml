@@ -1,0 +1,40 @@
+name: Sync Shadowrocket rules
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download current upstream rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Shadowrocket"
+          mkdir -p rules
+          curl --fail --location --retry 3 --output rules/OpenAI.list "$base/OpenAI/OpenAI.list"
+          curl --fail --location --retry 3 --output rules/Claude.list "$base/Claude/Claude.list"
+          curl --fail --location --retry 3 --output rules/Gemini.list "$base/Gemini/Gemini.list"
+          curl --fail --location --retry 3 --output rules/Google.list "$base/Google/Google.list"
+          curl --fail --location --retry 3 --output rules/Apple.list "$base/Apple/Apple.list"
+          curl --fail --location --retry 3 --output rules/China.list "$base/China/China.list"
+          curl --fail --location --retry 3 --output rules/Lan.list "$base/Lan/Lan.list"
+          curl --fail --location --retry 3 --output rules/Global.list "$base/Global/Global.list"
+      - name: Commit changes when rules changed
+        shell: bash
+        run: |
+          if git diff --quiet -- rules; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rules
+          git commit -m "Sync upstream Shadowrocket rules"
+          git push
