@@ -1,0 +1,122 @@
+# Credential-free Mihomo template. Add real proxies to PROXY before use.
+mixed-port: 7890
+allow-lan: false
+bind-address: 127.0.0.1
+mode: rule
+log-level: info
+ipv6: false
+udp: true
+
+tun:
+  enable: true
+  stack: gvisor
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: false
+  dns-hijack:
+    - any:53
+  route-exclude-address:
+    - 100.64.0.0/10
+    - fd7a:115c:a1e0::/48
+
+dns:
+  enable: true
+  listen: 127.0.0.1:53
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - '+.ts.net'
+    - '*.lan'
+    - '*.local'
+    - '*.arpa'
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+
+proxies: []
+
+proxy-groups:
+  - name: PROXY
+    type: select
+    proxies:
+      - DIRECT
+
+rule-providers:
+  local-priority:
+    type: file
+    behavior: classical
+    format: yaml
+    path: ./config/local-priority-rules.yaml
+  openai:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/OpenAI.yaml
+    path: ./ruleset/openai.yaml
+    interval: 21600
+  claude:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/Claude.yaml
+    path: ./ruleset/claude.yaml
+    interval: 21600
+  gemini:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/Gemini.yaml
+    path: ./ruleset/gemini.yaml
+    interval: 21600
+  google:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/Google.yaml
+    path: ./ruleset/google.yaml
+    interval: 21600
+  apple:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/Apple.yaml
+    path: ./ruleset/apple.yaml
+    interval: 21600
+  china:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/China.yaml
+    path: ./ruleset/china.yaml
+    interval: 21600
+  lan:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/Lan.yaml
+    path: ./ruleset/lan.yaml
+    interval: 21600
+  global:
+    type: http
+    behavior: classical
+    format: yaml
+    url: https://raw.githubusercontent.com/wang948514333/shadowrocket-config/main/Clash/rules/Global.yaml
+    path: ./ruleset/global.yaml
+    interval: 21600
+
+rules:
+  - RULE-SET,local-priority,DIRECT
+  - RULE-SET,openai,PROXY
+  - RULE-SET,claude,PROXY
+  - RULE-SET,gemini,PROXY
+  - RULE-SET,google,PROXY
+  - RULE-SET,apple,DIRECT
+  - RULE-SET,china,DIRECT
+  - RULE-SET,lan,DIRECT
+  - RULE-SET,global,PROXY
+  - GEOIP,CN,DIRECT,no-resolve
+  - MATCH,PROXY

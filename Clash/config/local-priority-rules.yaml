@@ -1,0 +1,14 @@
+# Rules in this file are maintained locally and never changed by the sync workflow.
+payload:
+  - DOMAIN,localhost
+  - DOMAIN-SUFFIX,local
+  - DOMAIN-SUFFIX,ts.net
+  - IP-CIDR,127.0.0.0/8
+  - IP-CIDR,10.0.0.0/8
+  - IP-CIDR,172.16.0.0/12
+  - IP-CIDR,192.168.0.0/16
+  - IP-CIDR,100.64.0.0/10
+  - IP-CIDR,169.254.0.0/16
+  - IP-CIDR,224.0.0.0/4
+  - IP-CIDR6,fd7a:115c:a1e0::/48
+  - IP-CIDR6,fe80::/10

@@ -1,0 +1,14 @@
+# Example policy mapping for the current Mac strategy groups.
+# Merge only after backing up the active Clash Verge enhancement files.
+rules:
+  - RULE-SET,local-priority,DIRECT
+  - RULE-SET,openai,ChatGPT
+  - RULE-SET,claude,节点选择
+  - RULE-SET,gemini,Gemini
+  - RULE-SET,google,谷歌服务
+  - RULE-SET,apple,DIRECT
+  - RULE-SET,china,DIRECT
+  - RULE-SET,lan,DIRECT
+  - RULE-SET,global,节点选择
+  - GEOIP,CN,DIRECT,no-resolve
+  - MATCH,节点选择
