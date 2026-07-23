@@ -1,0 +1,54 @@
+name: Sync Clash rules
+
+on:
+  schedule:
+    - cron: "31 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-clash-rules
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and validate upstream Clash rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash"
+          target_dir="Clash/rules"
+          temp_dir="$(mktemp -d)"
+          trap 'rm -rf "$temp_dir"' EXIT
+
+          for rule in OpenAI Claude Gemini Google Apple China Lan Global; do
+            file="$temp_dir/$rule.yaml"
+            curl --fail --location --retry 3 --output "$file" "$base/$rule/$rule.yaml"
+            test -s "$file"
+            ruby -ryaml -e '
+              data = YAML.load_file(ARGV.fetch(0))
+              payload = data.is_a?(Hash) ? data["payload"] : nil
+              abort "missing payload" unless payload.is_a?(Array) && !payload.empty?
+            ' "$file"
+          done
+
+          mkdir -p "$target_dir"
+          for rule in OpenAI Claude Gemini Google Apple China Lan Global; do
+            install -m 644 "$temp_dir/$rule.yaml" "$target_dir/$rule.yaml"
+          done
+      - name: Commit Clash rule changes
+        shell: bash
+        run: |
+          if git diff --quiet -- Clash/rules; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Clash/rules
+          git commit -m "Sync upstream Clash rules"
+          git push
